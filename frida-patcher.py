@@ -708,7 +708,7 @@ def main():
     # ---------------------------
     if platform == "android":
         print("[*] Android platform detected → starting gadget patch...")
-        patch_android_gadget_zip(args.file, tools_dir, frida_version)
+        patch_android_gadget_apktool(args.file, tools_dir, frida_version)
         sys.exit(0)
 
     # ---------------------------
