@@ -646,17 +646,10 @@ def main():
         print(f"Error: file not found: {args.file}")
         sys.exit(2)
 
-    # Always check tools unless manually skipped
-    sevenz_bin = None
-    if not args.no_check:
-        sevenz_bin = ensure_tools()  # now returns path to 7z
+    ensure_tools()
 
     # Detect platform
     platform = detect_platform(args.file)
-
-    if args.json:
-        print(json.dumps({"file": args.file, "platform": platform}))
-        sys.exit(0)
 
     print(f"[+] Detected platform: {platform}")
 
