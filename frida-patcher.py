@@ -503,7 +503,7 @@ def patch_android_gadget_zip(apk_path: str, tools_dir: str, frida_version: str):
     project_root = os.path.dirname(os.path.abspath(apk_path))
 
     # Extract only lib dir
-    extract_lib = "lib_extract"
+    extract_lib = os.path.join(os.path.dirname(os.path.abspath(apk_path)), "lib_extract")
     if os.path.exists(extract_lib):
         shutil.rmtree(extract_lib)
     os.makedirs(extract_lib)
@@ -575,7 +575,7 @@ def patch_android_gadget_zip(apk_path: str, tools_dir: str, frida_version: str):
 
     seven_zip = os.path.abspath(os.path.join(tools_dir, "7z"))
     unsigned_apk = os.path.abspath(apk_path.replace(".apk", "-patched-unsigned.apk"))
-    lib_absolute = os.path.abspath(os.path.join("lib_extract", "lib"))
+    lib_absolute = os.path.abspath(os.path.join(extract_lib, "lib"))
 
     # Make a copy of original APK
     shutil.copy(apk_path, unsigned_apk)
