@@ -3,7 +3,7 @@
 A lightweight cross‑platform tool for automatically injecting **Frida Gadget** into Android APKs.
 iOS support is currently **under development**.
 
-Support Only APK which enable `extractNativeLibs=true`
+
 Alternatively, use objection :)
 
 ---
