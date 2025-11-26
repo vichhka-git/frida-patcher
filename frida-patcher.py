@@ -346,6 +346,8 @@ def ensure_tools() -> None:
 
 def patch_android_gadget_apktool(apk_path: str, tools_dir: str, frida_version: str):
     import lief
+    import xml.etree.ElementTree as ET
+
     print("[*] Starting Android Gadget Patching...")
 
     apktool_jar = os.path.join(tools_dir, "apktool.jar")
@@ -360,7 +362,8 @@ def patch_android_gadget_apktool(apk_path: str, tools_dir: str, frida_version: s
     # 1) Decompile APK
     # ----------------------------------------------------
     print("[*] Decompiling APK...")
-    run_cmd(["java", "-jar", apktool_jar, "d", "-r", apk_path, "-o", temp_dir, "-f"])
+    run_cmd(["java", "-jar", apktool_jar, "empty-framework-dir"])
+    run_cmd(["java", "-jar", apktool_jar, "d", "-s", apk_path, "-o", temp_dir, "-f"])
 
     lib_root = os.path.join(temp_dir, "lib")
     if not os.path.exists(lib_root):
@@ -432,6 +435,44 @@ def patch_android_gadget_apktool(apk_path: str, tools_dir: str, frida_version: s
             print(f"[+] Added gadget: {gadget_dst}")
         else:
             print(f"[!] No gadget found for ABI {abi}")
+
+    # ----------------------------------------------------
+    # 3.5) MODIFY MANIFEST (Enable debug, Internet, external libs)
+    # ----------------------------------------------------
+    print("[*] Modifying AndroidManifest.xml ...")
+
+    manifest_path = os.path.join(temp_dir, "AndroidManifest.xml")
+    ET.register_namespace('android', "http://schemas.android.com/apk/res/android")
+    tree = ET.parse(manifest_path)
+    root = tree.getroot()
+
+    ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
+
+    # 1. Add uses-permission INTERNET
+    def ensure_permission(name):
+        for perm in root.findall("uses-permission"):
+            if perm.get(ANDROID_NS + "name") == name:
+                return
+        p = ET.Element("uses-permission")
+        p.set(ANDROID_NS + "name", name)
+        root.insert(0, p)
+
+    ensure_permission("android.permission.INTERNET")
+    ensure_permission("android.permission.ACCESS_NETWORK_STATE")
+    ensure_permission("android.permission.WRITE_EXTERNAL_STORAGE")
+    ensure_permission("android.permission.READ_EXTERNAL_STORAGE")
+
+    # 2. Force debuggable="true"
+    app_node = root.find("application")
+    if app_node is not None:
+        print("[+] Setting application android:debuggable=true")
+        app_node.set(ANDROID_NS + "debuggable", "true")
+
+        print("[+] Setting application android:extractNativeLibs=true")
+        app_node.set(ANDROID_NS + "extractNativeLibs", "true")
+
+    tree.write(manifest_path, encoding="utf-8", xml_declaration=True)
+    print("[+] Manifest updated successfully!")
 
     # ----------------------------------------------------
     # 4) Rebuild APK
