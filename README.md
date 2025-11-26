@@ -3,6 +3,8 @@
 A lightweight cross‑platform tool for automatically injecting **Frida Gadget** into Android APKs.
 iOS support is currently **under development**.
 
+Alternatively, use objection :)
+
 ---
 
 ## **✨ Features**
