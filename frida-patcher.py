@@ -667,16 +667,6 @@ def main():
     # ---------------------------
     if platform == "android":
         print("[*] Android platform detected → starting gadget patch...")
-        if not frida_version:
-            print("[!] Cannot determine Frida version, cannot patch.")
-            sys.exit(1)
-        if not sevenz_bin:
-            # fallback to system 7z
-            sevenz_bin = shutil.which("7z")
-            if not sevenz_bin:
-                print("[!] 7z not found. Cannot patch APK.")
-                sys.exit(1)
-
         patch_android_gadget_zip(args.file, tools_dir, frida_version)
         sys.exit(0)
 
